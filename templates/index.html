@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>News Aggregator</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="mb-4">📰 Latest News</h2>
+
+    {% for article in articles %}
+    <div class="card mb-4">
+      {% if article.image %}
+      <img src="{{ article.image }}" class="card-img-top" alt="Article Image">
+      {% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ article.title }}</h5>
+        <p class="card-text">{{ article.content }}</p>
+        <p class="text-muted mb-1">Source: {{ article.source }}</p>
+        <p class="text-muted">{{ article.publishedAt }}</p>
+        <a href="{{ article.url }}" class="btn btn-primary" target="_blank">Read more</a>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+</body>
+</html>
