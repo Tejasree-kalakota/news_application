@@ -1,47 +1,38 @@
 import os
-from flask import Flask, render_template
-from dotenv import load_dotenv
 import requests
-from newspaper import Article
-from datetime import datetime
+from flask import Flask, render_template
 
-load_dotenv()
 app = Flask(__name__)
-NEWS_API_KEY = os.getenv("NEWS_API_KEY")
 
-@app.route('/')
+@app.route("/")
 def index():
+    # Get API key from environment variable
+    api_key = os.environ.get("NEWS_API_KEY")
+
+    # Check if API key is found
+    if not api_key:
+        return "API key not found. Please set NEWS_API_KEY in environment variables."
+
+    # Build the URL
+    url = f"https://newsapi.org/v2/top-headlines?country=in&apiKey={api_key}"
+
+    # Make the API request
     try:
-        url = f'https://newsapi.org/v2/top-headlines?country=in&apiKey={NEWS_API_KEY}'
         response = requests.get(url)
         data = response.json()
-        articles = []
 
-        for item in data.get("articles", []):
-            article_url = item.get("url")
-            try:
-                article = Article(article_url)
-                article.download()
-                article.parse()
-                article.nlp()
+        # DEBUGGING
+        print("RESPONSE STATUS:", response.status_code)
+        print("RESPONSE JSON:", data)
 
-                articles.append({
-                    'title': item.get("title", "No Title"),
-                    'url': article_url,
-                    'content': article.summary[:200] + "...",
-                    'source': item['source']['name'],
-                    'image': item.get("urlToImage"),
-                    'publishedAt': datetime.strptime(item['publishedAt'], "%Y-%m-%dT%H:%M:%SZ").strftime("%b %d, %Y %I:%M %p")
-                })
+        # Extract articles or return empty list
+        articles = data.get("articles", [])
 
-            except Exception as e:
-                print(f"⚠️ Skipping article due to parse error: {e}")
-                continue
-
-        return render_template('index.html', articles=articles)
+        return render_template("index.html", articles=articles)
 
     except Exception as e:
-        return f"<h1>Something went wrong: {e}</h1>"
+        return f"Something went wrong while fetching news: {e}"
 
-if __name__ == '__main__':
+# Run the app locally (optional)
+if __name__ == "__main__":
     app.run(debug=True)

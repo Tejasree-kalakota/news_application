@@ -1,6 +1,4 @@
-Flask
-python-dotenv
-requests
-newspaper3k
-lxml[html_clean]
+Flask==2.3.3
 gunicorn
+requests
+
