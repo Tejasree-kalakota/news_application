@@ -4,35 +4,20 @@ from flask import Flask, render_template
 
 app = Flask(__name__)
 
+NEWS_API_KEY = os.getenv("NEWS_API_KEY")
+NEWS_API_URL = "https://newsapi.org/v2/top-headlines?country=in&apiKey=" + NEWS_API_KEY
+
 @app.route("/")
 def index():
-    # Get API key from environment variable
-    api_key = os.environ.get("NEWS_API_KEY")
-
-    # Check if API key is found
-    if not api_key:
-        return "API key not found. Please set NEWS_API_KEY in environment variables."
-
-    # Build the URL
-    url = f"https://newsapi.org/v2/top-headlines?country=in&apiKey={api_key}"
-
-    # Make the API request
+    articles = []
     try:
-        response = requests.get(url)
+        response = requests.get(NEWS_API_URL)
         data = response.json()
+        print(data)  # Logs to Render
 
-        # DEBUGGING
-        print("RESPONSE STATUS:", response.status_code)
-        print("RESPONSE JSON:", data)
-
-        # Extract articles or return empty list
-        articles = data.get("articles", [])
-
-        return render_template("index.html", articles=articles)
-
+        if data.get("status") == "ok" and data.get("articles"):
+            articles = data["articles"]
     except Exception as e:
-        return f"Something went wrong while fetching news: {e}"
+        print(f"Error: {e}")
 
-# Run the app locally (optional)
-if __name__ == "__main__":
-    app.run(debug=True)
+    return render_template("index.html", articles=articles)
